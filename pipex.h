@@ -1,6 +1,7 @@
 #ifndef PIPEX_H
 # define PIPEX_H
 
+#include "libft/libft.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -21,7 +22,10 @@ typedef struct s_pipex
     char    **env;
     char    **s_env;
     char    **cmdac;
-    int *p_fd;
+    char    *path;
+    int     *p_fd;
+    int    cmd1;
+    int    cmd2;
 }		t_pipex;
 
 void ft_exec(char **cmd);
