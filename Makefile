@@ -7,12 +7,12 @@ CFLAGS = -Werror -Wall -Wextra
 RM = rm -rf
 
 SRCS = 	pipex.c\
+		main.c\
 		libft/libft.a\
 
 $(NAME) :
 	make all -C libft
-	#gcc $(SRCS) -o $(NAME) -fsanitize=address
-	gcc $(CFLAGS) $(SRCS) -o $(NAME)
+	gcc -fsanitize=address $(CFLAGS) $(SRCS) -o $(NAME)
 
 all : $(NAME)
 

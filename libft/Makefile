@@ -47,16 +47,6 @@ SRCS = \
 	str/ft_strnstr.c \
 	str/ft_strrchr.c \
 	str/ft_striteri.c \
-	\
-	gnl/get_next_line_utils.c \
-	gnl/get_next_line.c \
-	\
-	printf/ft_printf.c\
-	printf/src/base.c\
-	printf/src/iscors.c\
-	printf/src/ishex.c\
-	printf/src/isintp.c\
-	printf/src/utils.c\
 
 OBJS = ${SRCS:.c=.o}
 
