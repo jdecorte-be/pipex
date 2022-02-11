@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdecorte <jdecorte@student.42.fr>          +#+  +:+       +#+        */
+/*   By: decortejohn <decortejohn@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/31 18:31:27 by jdecorte          #+#    #+#             */
-/*   Updated: 2021/10/31 18:46:35 by jdecorte         ###   ########.fr       */
+/*   Updated: 2022/02/11 20:40:08 by decortejohn      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
 
-# include "libft/libft.h"
+# include "../libft/libft.h"
 # include <unistd.h>
 # include <stdio.h>
 # include <sys/types.h>
@@ -22,23 +22,11 @@
 # include<sys/stat.h>
 # include <fcntl.h>  
 # include <stdlib.h>
-# define STDERR 2
 
-typedef struct s_pipex
-{
-	int		fd1;
-	int		fd2;
-	char	**av;
-	char	**env;
-	char	**cmdac;
-	char	*path;
-	int		p_fd[2];
-	char	*exec;
-	char	**cmd;
-	char	**allpath;
-}		t_pipex;
-
-void	pipex(t_pipex *tab);
-void	puterror(char *str);
+int open_file(char *file, int n);
+char	*my_getenv(char *name, char **env);
+char	*get_path(char *cmd, char **env);
+void    exec(char *cmd, char **env);
+void	ft_free_tab(char **tab);
 
 #endif // !PIPEX_H

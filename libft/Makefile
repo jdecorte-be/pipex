@@ -47,6 +47,9 @@ SRCS = \
 	str/ft_strnstr.c \
 	str/ft_strrchr.c \
 	str/ft_striteri.c \
+	str/ft_strcmp.c \
+	\
+	get_next_line_bonus.c \
 
 OBJS = ${SRCS:.c=.o}
 
