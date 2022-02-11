@@ -6,7 +6,7 @@
 /*   By: decortejohn <decortejohn@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/11 20:00:33 by decortejohn       #+#    #+#             */
-/*   Updated: 2022/02/11 22:49:56 by decortejohn      ###   ########.fr       */
+/*   Updated: 2022/02/12 00:17:18 by decortejohn      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ int	open_file(char *file, int in_or_out)
 		ret = open(file, O_WRONLY, 0777);
 	if(in_or_out == 1)
 		ret = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (in_or_out == 2)
-		ret = open(file, O_WRONLY | O_CREAT | O_APPEND, 0777);
 	if(ret == -1)
 		exit(0);
 	return ret;
