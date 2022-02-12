@@ -6,7 +6,7 @@
 /*   By: decortejohn <decortejohn@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/10 17:22:50 by jdecorte          #+#    #+#             */
-/*   Updated: 2022/02/11 22:44:17 by decortejohn      ###   ########.fr       */
+/*   Updated: 2022/02/12 10:58:26 by decortejohn      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,26 +14,24 @@
 
 void	exit_handler(int n_exit)
 {
-	if(n_exit == 1)
+	if (n_exit == 1)
 		ft_putstr_fd("./pipex infile cmd cmd outfile\n", 2);
-	
-
-	exit(-1);
+	exit(0);
 }
 
 int	open_file(char *file, int in_or_out)
 {
-	int ret;
+	int	ret;
 
 	if (in_or_out == 0)
-		ret = open(file, O_WRONLY, 0777);
-	if(in_or_out == 1)
+		ret = open(file, O_RDONLY, 0777);
+	if (in_or_out == 1)
 		ret = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (in_or_out == 2)
 		ret = open(file, O_WRONLY | O_CREAT | O_APPEND, 0777);
-	if(ret == -1)
+	if (ret == -1)
 		exit(0);
-	return ret;
+	return (ret);
 }
 
 void	ft_free_tab(char **tab)
@@ -51,9 +49,9 @@ void	ft_free_tab(char **tab)
 
 char	*my_getenv(char *name, char **env)
 {
-	int	i;
-	int	j;
-	char *sub;
+	int		i;
+	int		j;
+	char	*sub;
 
 	i = 0;
 	while (env[i])

@@ -6,7 +6,7 @@
 /*   By: decortejohn <decortejohn@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/31 18:31:27 by jdecorte          #+#    #+#             */
-/*   Updated: 2022/02/11 22:41:15 by decortejohn      ###   ########.fr       */
+/*   Updated: 2022/02/12 11:04:27 by decortejohn      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@
 # include <stdlib.h>
 
 void	exit_handler(int n_exit);
-int     open_file(char *file, int n);
+int		open_file(char *file, int n);
 char	*my_getenv(char *name, char **env);
 char	*get_path(char *cmd, char **env);
-void    exec(char *cmd, char **env);
+void	exec(char *cmd, char **env);
 void	ft_free_tab(char **tab);
 
-#endif // !PIPEX_H
+#endif

@@ -6,7 +6,7 @@
 /*   By: decortejohn <decortejohn@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 14:09:15 by jdecorte          #+#    #+#             */
-/*   Updated: 2022/02/11 22:42:10 by decortejohn      ###   ########.fr       */
+/*   Updated: 2022/02/12 10:55:04 by decortejohn      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,6 @@ void	do_pipe(char *cmd, char **env)
 	{
 		close(p_fd[1]);
 		dup2(p_fd[0], 0);
-		waitpid(pid, NULL, 0);
 	}
 }
 
