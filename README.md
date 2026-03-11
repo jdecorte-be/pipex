@@ -54,15 +54,7 @@
          alt="pipex last commit">
   </a>
 </p>
-<p align="center">
-  <a href="#pipex-infile-cmd1-cmd2-outfile">./pipex infile cmd1 cmd2 outfile</a> •
-  <a href="#pipe-sends-the-output-of-the-first-execve-as-input-to-the-second-execve">pipe() sends the output of the first execve() as input to the second execve()</a> •
-  <a href="#fork-runs-two-processes-ie-two-commands-in-one-single-program">fork() runs two processes (i.e. two commands) in one single program</a> •
-  <a href="#dup2-swaps-our-files-with-stdin-and-stdout">dup2() swaps our files with stdin and stdout</a> •
-  <a href="#setting-the-pipe">Setting the pipe</a> •
-  <a href="#pipe-takes-an-array-of-two-int-and-links-them-together">pipe() takes an array of two int, and links them together</a> •
-  <a href="#what-is-done-in-end0-is-visible-to-end1-and-vice-versa">what is done in end[0] is visible to end[1], and vice versa</a>
-</p>
+
 </header>
 
 Pipex is a project that re-creates in C the way two commands are piped together via `|` in the shell
