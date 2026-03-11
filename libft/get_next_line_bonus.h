@@ -18,6 +18,10 @@
 # include <sys/uio.h>
 # include <unistd.h>
 
+# ifndef OPEN_MAX
+#  define OPEN_MAX 1024
+# endif
+
 # define BUFFER_SIZE 50
 
 char	*get_next_line(int fd);
