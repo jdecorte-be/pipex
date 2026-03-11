@@ -57,6 +57,8 @@
 
 </header>
 
+---
+
 This project is a C program that reproduces the behavior of the shell pipe (`|`). It's a 42 school assignment designed to provide a deeper understanding of process creation and inter-process communication in Unix-like operating systems using system calls like `pipe()`, `fork()`, `dup2()`, and `execve()`.
 
 ### Features
