@@ -1,4 +1,69 @@
+<header>
+<h1 align="center">
+  <a href="https://github.com/jdecorte-be/pipex"><img src=".assets/banner.png" alt="pipex" ></a>
+  pipex
+  <br>
+</h1>
 
+<p align="center">
+  A C program that reproduces the behavior of the shell pipe (`|`). This 42 school project uses `fork()`, `pipe()`, and `dup2()` to manage processes and I/O.
+</p>
+
+<p align="center">
+<a href="https://www.42.fr/">
+    <img src="https://img.shields.io/badge/42-School%20Project-00BABC?logo=42&logoColor=white&labelColor=000000"
+         alt="42 School Project">
+  </a>
+<a href="#">
+    <img src="https://img.shields.io/badge/Type-CLI%20Tool-blue?logo=gnubash&logoColor=white&labelColor=000000"
+         alt="Type CLI Tool">
+  </a>
+<a href="#">
+    <img src="https://img.shields.io/badge/Focus-System%20Programming-informational?logo=linux&logoColor=white&labelColor=000000"
+         alt="Focus System Programming">
+  </a>
+<a href="#">
+    <img src="https://img.shields.io/badge/Technology-IPC%20%28pipe%2Ffork%29-orange?logo=c&logoColor=white&labelColor=000000"
+         alt="Technology IPC (pipe/fork)">
+  </a>
+</p>
+
+<p align="center">
+<a href="#">
+    <img src="https://img.shields.io/badge/Platform-Unix--like-lightgrey?logo=unix&logoColor=white&labelColor=000000"
+         alt="Platform Unix-like">
+  </a>
+  <a href="https://github.com/jdecorte-be/pipex/stargazers">
+    <img src="https://img.shields.io/github/stars/jdecorte-be/pipex?logo=star&logoColor=white&labelColor=000000&color=E6DB74"
+         alt="pipex stars">
+  </a>
+  <a href="https://github.com/jdecorte-be/pipex/issues">
+    <img src="https://img.shields.io/github/issues/jdecorte-be/pipex?logoColor=white&labelColor=000000&color=orange"
+         alt="pipex issues">
+  </a>
+  <a href="https://github.com/jdecorte-be/pipex">
+    <img src="https://img.shields.io/github/repo-size/jdecorte-be/pipex?logo=database&logoColor=white&labelColor=000000&color=AE81FF"
+         alt="pipex repo size">
+  </a>
+  <a href="https://github.com/jdecorte-be/pipex">
+    <img src="https://img.shields.io/github/languages/top/jdecorte-be/pipex?logo=code&logoColor=white&labelColor=000000&color=A6E22E"
+         alt="pipex top language">
+  </a>
+  <a href="https://github.com/jdecorte-be/pipex/commits">
+    <img src="https://img.shields.io/github/last-commit/jdecorte-be/pipex?logo=clock&logoColor=white&labelColor=000000&color=66D9EF"
+         alt="pipex last commit">
+  </a>
+</p>
+<p align="center">
+  <a href="#pipex-infile-cmd1-cmd2-outfile">./pipex infile cmd1 cmd2 outfile</a> •
+  <a href="#pipe-sends-the-output-of-the-first-execve-as-input-to-the-second-execve">pipe() sends the output of the first execve() as input to the second execve()</a> •
+  <a href="#fork-runs-two-processes-ie-two-commands-in-one-single-program">fork() runs two processes (i.e. two commands) in one single program</a> •
+  <a href="#dup2-swaps-our-files-with-stdin-and-stdout">dup2() swaps our files with stdin and stdout</a> •
+  <a href="#setting-the-pipe">Setting the pipe</a> •
+  <a href="#pipe-takes-an-array-of-two-int-and-links-them-together">pipe() takes an array of two int, and links them together</a> •
+  <a href="#what-is-done-in-end0-is-visible-to-end1-and-vice-versa">what is done in end[0] is visible to end[1], and vice versa</a>
+</p>
+</header>
 
 Pipex is a project that re-creates in C the way two commands are piped together via `|` in the shell
 
