@@ -57,246 +57,167 @@
 
 </header>
 
-Pipex is a project that re-creates in C the way two commands are piped together via `|` in the shell
+This project is a C program that reproduces the behavior of the shell pipe (`|`). It's a 42 school assignment designed to provide a deeper understanding of process creation and inter-process communication in Unix-like operating systems using system calls like `pipe()`, `fork()`, `dup2()`, and `execve()`.
 
-````
-# ./pipex infile cmd1 cmd2 outfile
-pipe()
- |
- |-- fork()
-      |
-      |-- child // cmd1
-      :     |--dup2()
-      :     |--close end[0]
-      :     |--execve(cmd1)
-      :
-      |-- parent // cmd2
-            |--dup2()
-            |--close end[1]
-            |--execve(cmd2)
- 
-# pipe() sends the output of the first execve() as input to the second execve()
-# fork() runs two processes (i.e. two commands) in one single program
-# dup2() swaps our files with stdin and stdout
- ````
-## Setting the pipe
+### Features
 
-````
-void    pipex(int f1, int f2)
-{
-    int end[2];    pipe(end);
-}
+*   **Mandatory Part:** Replicates the behavior of `< infile cmd1 | cmd2 > outfile`.
+*   **Bonus Part:**
+    *   Supports multiple pipes: `< infile cmd1 | cmd2 | ... | cmdn > outfile`.
+    *   Supports `here_doc` input: `cmd1 << LIMITER | cmd2 >> outfile`.
 
-# pipe() takes an array of two int, and links them together
-# what is done in end[0] is visible to end[1], and vice versa
-# pipe() assigns an fd to each end
-# Fds are file descriptors
-# since files can be read and written to, by getting an fd each, the two ends can communicate
-# end[1] will write to the its own fd, and end[0] will read end[1]’s fd and write to its own
+## Getting Started
 
-````
-## Forking the processes
+### Prerequisites
 
-````
-void    pipex(int f1, int f2)
-{
-    int   end[2];
-    pid_t parent;    pipe(end);
-    parent = fork();
-    if (parent < 0)
-         return (perror("Fork: "));
-    if (!parent) // if fork() returns 0, we are in the child process
-        child_process(f1, cmd1);
-    else
-        parent_process(f2, cmd2);
-}
+*   A C compiler (like `gcc` or `clang`)
+*   `make`
 
-# fork() splits the process in two sub-processes -> parallel, simultaneous, happen at the same time
-# it returns 0 for the child process, a non-zero for the parent process, -1 in case of error
-````
-end[1] is the child process, end[0] the parent process; the child writes, the parent reads  
-Since for something to be read, it must be written first, so cmd1 will be executed by the child, and cmd2 by the parent.  
+### Building the Project
 
-## FDs
-pipex is run like this ./pipex infile cmd1 cmd2 outfile  
-FDs 0, 1 and 2 are by default assigned to stdin, stdout and stderr  
-`infile`, `outfile`, the pipe, the `stdin` and `stdout` are all FDs  
-On linux, you can check your fds currently open with the command ls -la /proc/$$/fd  
+1.  Clone the repository:
+    ```shell
+    git clone https://github.com/jdecorte-be/pipex.git
+    cd pipex
+    ```
 
-Our fd table right now looks like this:
-````
-                           -----------------    
-                 0         |     stdin     |  
-                           -----------------    
-                 1         |     stdout    |    
-                           -----------------    
-                 2         |     stderr    |  
-                           -----------------
-                 3         |     infile    |  // open()
-                           -----------------
-                 4         |     outfile   |  // open()
-                           -----------------
-                 5         |     end[0]    | 
-                           -----------------
-                 6         |     end[1]    |  
-                           -----------------
-````
-## Swapping fds with dup2()
+2.  The project includes a `libft` submodule. Initialize and update it:
+    ```shell
+    git submodule update --init --recursive
+    ```
 
-For the child process, we want infile to be our stdin (as input), and end[1] to be our stdout (we write to end[1] the output of cmd1)  
-In the parent process, we want end[0] to be our stdin (end[0] reads from end[1] the output of cmd1), and outfile to be our stdout (we write to it the output of cmd2)  
-Visually,
-````
-// each cmd needs a stdin (input) and returns an output (to stdout)
-   
-    infile                                             outfile
-as stdin for cmd1                                 as stdout for cmd2            
-       |                        PIPE                        ↑
-       |           |---------------------------|            |
-       ↓             |                       |              |
-      cmd1   -->    end[1]       ↔       end[0]   -->     cmd2           
-                     |                       |
-            cmd1   |---------------------------|  end[0]
-           output                             reads end[1]
-         is written                          and sends cmd1
-          to end[1]                          output to cmd2
-       (end[1] becomes                      (end[0] becomes 
-        cmd1 stdout)                           cmd2 stdin)
+3.  Compile the program using the `Makefile`:
+    ```shell
+    # For the mandatory part
+    make
 
-````
-We swap fds to stdin/stdout with dup2()  
-From the MAN, 
-````
-int dup2(int fd1, int fd2) : it will close fd2 and duplicate the value of fd2 to fd1
-else said, it will redirect fd1 to fd2
-````
-In pseudo code:
-````
-# child_process(f1, cmd1); // add protection if dup2() < 0
-// dup2 close stdin, f1 becomes the new stdin
-dup2(f1, STDIN_FILENO); // we want f1 to be execve() input
-dup2(end[1], STDOUT_FILENO); // we want end[1] to be execve() stdout
-close(end[0]) # --> always close the end of the pipe you don't use,
-                    as long as the pipe is open, the other end will 
-                    be waiting for some kind of input and will not
-                    be able to finish its process
-close(f1)
-// execve function for each possible path (see below)
-exit(EXIT_FAILURE);
-````
-Parent process in pseudo code will be similar  
-It needs a `waitpid()` at the very beginning to wait for the child to finish her process  
-````
-# parent_process(f2, cmd2);
-int status;
-waitpid(-1, &status, 0);
-dup2(f2, ...); // f2 is the stdout
-dup2(end[0], ...); // end[0] is the stdin
-close(end[1])
-close(f2);
-// execve function for each possible path (see below)
-exit(EXIT_FAILURE);
-````
-## Executing with execve()
+    # For the bonus part (multiple pipes and here_doc)
+    make bonus
+    ```
 
-From the MAN,
-````
-int execve(const char *path, char *const argv[], char *envp[]);
+## Usage
 
-# path: the path to our command
-# type `which ls` and `which wc` in your terminal
-# you'll see the exact path to the commands' binaries
+### Mandatory
 
-# argv[]: the args the command needs, for ex. `ls -la`
-# you can use your ft_split to obtain a char **
-# like this { "ls", "-la", NULL }
-# it must be null terminated
+The program takes four arguments: an input file, two commands, and an output file. It redirects the output of the first command to the input of the second command.
 
-# envp: environmental variable -> retrieved from main (see below)
-# in envp the line PATH contains all possible paths to the commands' binaries
-# type env in the terminal to have a look
-# split on : to retrieve all possible PATHs 
+**Syntax:**
+```shell
+./pipex <infile> <cmd1> <cmd2> <outfile>
+```
 
-int main(int ac, char **ag, char **envp)
-{
-     int f1;
-     int f2;
-     f1 = open(ag[1], O_RDONLY);
-     f2 = open(ag[4], O_CREAT | O_RDWR | O_TRUNC, 0644);
-     if (f1 < 0 || f2 < 0)
-          return (-1);
-     pipex(f1, f2, ag, envp);
-     return (0);
-}
-````
-`execve()` will try every possible path to the cmd until it finds the good one  
-If the command does not exist, `execve()` will do nothing and return -1;  
-else, it will execute the cmd and delete all ongoing processes (so no leaks)  
+**Example:**
+This is equivalent to the shell command: `< infile grep a1 | wc -l > outfile`
+```shell
+./pipex infile "grep a1" "wc -l" outfile
+```
 
-In pseudo code,
-````
-// parsing (somewhere in your code) char *PATH_from_envp;
-char **mypaths;
-char **mycmdargs; // retrieve the line PATH from envp
+### Bonus: Multiple Pipes
 
-PATH_from_envp = ft_substr(envp ....);
-mypaths = ft_split(PATH_from_envp, ":");
-mycmdargs = ft_split(ag[2], " ");// in your child or parent process
-int  i;
-char *cmd;
+The bonus version can handle an arbitrary number of commands chained together.
 
-i = -1;
-while (mypaths[++i])
-{
-    cmd = ft_join(mypaths[i], ag[2]); // protect your ft_join
-    execve(cmd, mycmdargs, envp); // if execve succeeds, it exits
-    // perror("Error"); <- add perror to debug
-    free(cmd) // if execve fails, we free and we try a new path
-}
-return (EXIT_FAILURE);
-````
-## Creating a pipe with two child processes
+**Syntax:**
+```shell
+./pipex <infile> <cmd1> <cmd2> <cmd3> ... <outfile>
+```
 
-````
-void    pipex(int f1, int f2, char *cmd1, char *cmd 2)
-{
-    int   end[2];
-    int   status;
-    pid_t child1;
-    pid_t child2;    pipe(end);
-    child1 = fork();
-    if (child1 < 0)
-         return (perror("Fork: "));
-    if (child1 == 0)
-        child_one(f1, cmd1);
-    child2 = fork();
-    if (child2 < 0)
-         return (perror("Fork: "));
-    if (child2 == 0)
-        child_two(f2, cmd2);
-    close(end[0]);         // this is the parent
-    close(end[1]);         // doing nothing
-    waitpid(child1, &status, 0);  // supervising the children
-    waitpid(child2, &status, 0);  // while they finish their tasks
-}
-````
-## Using access()
+**Example:**
+Equivalent to: `< infile grep a | cat -e | wc -l > outfile`
+```shell
+./pipex infile "grep a" "cat -e" "wc -l" outfile
+```
 
-If the command that does not exist, execve() will execute nothing without error messages  
-You need to check if the command exists before its execution with `access()`, else send an error `pipex: weirdcmd: weirdcmd not found`  
+### Bonus: Here Document (`here_doc`)
 
-## Debugging
+The bonus version also supports `here_doc` as an input source.
 
-[0] When splitting the env, print out the result of split. Add a `/` at the end for the path to work correctly.
+**Syntax:**
+```shell
+./pipex here_doc <LIMITER> <cmd1> <cmd2> ... <outfile>
+```
 
-[1] If the program gets stuck without executing anything, most probably the pipe ends are not closed correctly.
-Until one end is open, the other will be waiting for input and its process will not finish.
+**Example:**
+Reads from standard input until `EOF` is entered, then pipes the result through `grep` and `wc`.
+```shell
+./pipex here_doc EOF "grep a" "wc -w" outfile
+```
 
-[2] Place `perror("Error")` in your code, especially right after fork() or execve() , to see what is going on in the pipe.
-Inside the pipe, everything we do will go to one of its ends.
-`printf` for ex. won’t print to the terminal, it will print to your outfile (because we swapped the stdout)
-`perror("Error")` will work because it prints to stderr.
+## Core Concepts
 
-[3] Handle file rights when `open()`ing them.
-Return error if the file cannot be opened, read or written. 
-Check how the shell treats infile and outfile when they do not exist, are not readable, writable etc. (chmod is your best friend).
+This project revolves around orchestrating multiple processes and managing their input and output streams. The goal is to create a data flow like this:
+
+`infile` -> `[stdin]` **cmd1** `[stdout]` -> `[pipe]` -> `[stdin]` **cmd2** `[stdout]` -> `outfile`
+
+This is achieved using four key system calls.
+
+### 1. `pipe()` - Inter-Process Communication
+
+A pipe is a unidirectional data channel that allows one process to send data to another.
+
+```c
+int pipe(int pipefd[2]);
+```
+
+*   `pipe()` creates a pipe and returns two file descriptors in the `pipefd` array:
+    *   `pipefd[0]`: The **read end** of the pipe.
+    *   `pipefd[1]`: The **write end** of the pipe.
+*   Data written to `pipefd[1]` can be read from `pipefd[0]`.
+
+### 2. `fork()` - Process Creation
+
+To run two commands simultaneously, we need two separate processes. `fork()` creates a new process by duplicating the calling process.
+
+```c
+pid_t fork(void);
+```
+
+*   **In the parent process**, `fork()` returns the process ID (PID) of the newly created child process.
+*   **In the child process**, `fork()` returns `0`.
+*   If an error occurs, it returns `-1`.
+
+This allows us to execute different code blocks for the parent and child, enabling them to handle `cmd1` and `cmd2` respectively.
+
+### 3. `dup2()` - I/O Redirection
+
+By default, a process reads from standard input (`stdin`, fd 0) and writes to standard output (`stdout`, fd 1). `dup2()` allows us to redirect these streams.
+
+```c
+int dup2(int oldfd, int newfd);
+```
+
+`dup2()` makes `newfd` a copy of `oldfd`, closing `newfd` first if necessary. This is the key to connecting our files and pipes to the commands.
+
+*   **For the first command (child process):**
+    1.  Redirect `stdin` to read from `infile`: `dup2(infile_fd, STDIN_FILENO)`.
+    2.  Redirect `stdout` to write to the pipe: `dup2(pipefd[1], STDOUT_FILENO)`.
+*   **For the second command (parent process):**
+    1.  Redirect `stdin` to read from the pipe: `dup2(pipefd[0], STDIN_FILENO)`.
+    2.  Redirect `stdout` to write to `outfile`: `dup2(outfile_fd, STDOUT_FILENO)`.
+
+### 4. `execve()` - Command Execution
+
+The `execve()` system call replaces the current process image with a new program. This is how we run the user-specified commands (e.g., `ls`, `grep`, `wc`).
+
+```c
+int execve(const char *pathname, char *const argv[], char *const envp[]);
+```
+
+*   `pathname`: The absolute path to the command's executable (e.g., `/bin/ls`).
+*   `argv[]`: An array of arguments for the command, with the first element being the command name itself (e.g., `{"ls", "-l", NULL}`).
+*   `envp[]`: An array of environment variables, which is needed to find the command `pathname` if it's not an absolute path.
+
+To find the correct `pathname`, we parse the `PATH` variable from `envp`, split it by `:`, and test each directory to find the executable.
+
+## Debugging Tips
+
+*   **Hanging Program:** If your program hangs, it's almost always because a pipe's file descriptor was not closed correctly. Every process that has access to the pipe must close **both** ends when it's done with them. The kernel will only signal "end-of-file" on the read end when all write ends have been closed.
+*   **No Output:** `printf` writes to `stdout`. If you have redirected `stdout` using `dup2`, your debug messages will go to a file or a pipe, not the terminal. Use `perror()` or write directly to `stderr` (fd 2) for debugging messages that should always appear on the console.
+    ```c
+    // perror prints the error message for the last failed system call
+    perror("Error executing command");
+
+    // ft_putstr_fd is a useful function from libft
+    ft_putstr_fd("Debug: In child process\n", STDERR_FILENO);
+    ```
+*   **Command Not Found:** Before calling `execve()`, use `access()` to check if the command executable exists and has the correct permissions. This allows you to provide a more informative error message, like `bash: cmd: command not found`.
+*   **File Permissions:** Handle errors from `open()` gracefully. Your program should mimic the shell's behavior when `infile` doesn't exist or `outfile` cannot be written to.
